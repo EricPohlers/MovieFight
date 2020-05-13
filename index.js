@@ -24,24 +24,43 @@ const fetchData = async (searchTerm) => {
   if (response.data.Error) {
     return [];
   }
+
   return response.data.Search;
 };
 
 const onInput = async (event) => {
   const movies = await fetchData(event.target.value);
 
+  if (!movies.length) {
+    dropdown.classList.remove('is-active');
+    return;
+  }
+
+  resultsWrapper.innerHTML = '';
   dropdown.classList.add('is-active');
+
   movies.forEach((movie) => {
     const option = document.createElement('a');
+    const imgSrc = movie.Poster === 'N/A' ? '' : movie.Poster;
 
     option.classList.add('dropdown-item');
     option.innerHTML = `
-    <img src="${movie.Poster}" />
+    <img src="${imgSrc}" />
     ${movie.Title}
     `;
+    option.addEventListener('click', (event) => {
+      dropdown.classList.remove('is-active');
+      input.value = movie.Title;
+    });
 
     resultsWrapper.appendChild(option);
   });
 };
 
 input.addEventListener('input', debounce(onInput, 500));
+
+document.addEventListener('click', (event) => {
+  if (!root.contains(event.target)) {
+    dropdown.classList.remove('is-active');
+  }
+});
